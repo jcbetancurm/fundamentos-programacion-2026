@@ -10,7 +10,7 @@
     header { background: #1e293b; color: #ffffff; padding: 1.2rem 2rem; border-bottom: 4px solid #d97706; }
     header h1 { margin: 0; font-size: 1.4rem; }
     header p { margin: 0.2rem 0 0; color: #cbd5e1; font-size: 0.9rem; }
-    .container { max-width: 1200px; margin: 1.5rem auto; padding: 0 1rem; }
+    .container { max-width: 1220px; margin: 1.5rem auto; padding: 0 1rem; }
     .alerta-agotado {
       background: #fee2e2; border: 1px solid #ef4444; color: #991b1b;
       padding: 1rem; border-radius: 8px; margin-bottom: 1.25rem; font-weight: 500;
@@ -19,22 +19,40 @@
       background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px;
       padding: 1.25rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
-    .card h2 { margin-top: 0; font-size: 1.15rem; color: #1e293b; }
+    .card h2 { margin-top: 0; font-size: 1.1rem; color: #1e293b; }
     .form-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(195px, 1fr));
       gap: 0.9rem; align-items: end;
+    }
+    .import-bar {
+      display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: center; justify-content: space-between;
+    }
+    .import-form {
+      display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center;
     }
     .campo { display: flex; flex-direction: column; gap: 0.3rem; }
     label { font-size: 0.85rem; font-weight: 600; }
-    input { padding: 0.55rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; }
+    input, select {
+      padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: #fff;
+    }
     .btn-guardar {
-      background: #d97706; color: #ffffff; border: none; padding: 0.62rem;
+      background: #d97706; color: #ffffff; border: none; padding: 0.6rem 1rem;
       border-radius: 6px; font-weight: 700; cursor: pointer;
     }
     .btn-guardar:hover { background: #b45309; }
+    .btn-secundario {
+      background: #1e293b; color: #ffffff; border: none; padding: 0.55rem 0.95rem;
+      border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.88rem;
+    }
+    .btn-secundario:hover { background: #334155; }
+    .btn-outline {
+      background: #f8fafc; color: #1e293b; border: 1px solid #cbd5e1; padding: 0.55rem 0.95rem;
+      border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.88rem;
+    }
+    .nota-formato { font-size: 0.8rem; color: #475569; margin-top: 0.5rem; }
     .tabla-scroll { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-    th, td { padding: 0.7rem 0.6rem; border-bottom: 1px solid #cbd5e1; text-align: left; white-space: nowrap; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    th, td { padding: 0.65rem 0.55rem; border-bottom: 1px solid #cbd5e1; text-align: left; white-space: nowrap; }
     th { background: #f8fafc; color: #1e293b; }
     tr.fila-agotada { background: #fef2f2; }
     .badge { padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; }
@@ -52,11 +70,10 @@
 <body>
   <header>
     <h1>FerreControl — Gestión de Inventario</h1>
-    <p>Backend en Python (Flask) + Frontend en HTML5</p>
+    <p>Backend en Python (Flask) + Frontend en HTML5 | Carga de Base de Datos Externa</p>
   </header>
 
   <main class="container">
-    <!-- Notificación automática cuando existen productos con cantidad = 0 -->
     {% if productos_agotados %}
     <div class="alerta-agotado" role="alert">
       <strong>⚠️ ALERTA DE PRODUCTO AGOTADO:</strong>
@@ -65,17 +82,39 @@
     </div>
     {% endif %}
 
-    <!-- Formulario web para ingresar datos del almacén -->
+    <!-- Panel de carga masiva de mini base de datos (CSV / JSON) -->
     <section class="card">
-      <h2>Registrar / Actualizar Producto en Almacén</h2>
+      <h2>Cargar Mini Base de Datos Externa (CSV o JSON)</h2>
+      <div class="import-bar">
+        <form method="POST" action="/importar" enctype="multipart/form-data" class="import-form">
+          <input type="file" name="archivo_bd" accept=".csv,.json" required />
+          <select name="modo_carga">
+            <option value="reemplazar">Reemplazar inventario actual</option>
+            <option value="combinar">Agregar / actualizar sobre el actual</option>
+          </select>
+          <button type="submit" class="btn-secundario">Subir Base de Datos</button>
+        </form>
+
+        <form method="POST" action="/restaurar">
+          <button type="submit" class="btn-outline">Restaurar Catálogo Base (15 productos)</button>
+        </form>
+      </div>
+      <p class="nota-formato">
+        Columnas admitidas en CSV/JSON: <code>id, nombre, cantidad, precio, iva_porcentaje, fecha_compra, fecha_venta</code>.
+      </p>
+    </section>
+
+    <!-- Formulario web individual -->
+    <section class="card">
+      <h2>Registrar / Actualizar Producto Individual</h2>
       <form method="POST" action="/" class="form-grid">
         <div class="campo">
           <label for="id">ID *</label>
-          <input type="text" id="id" name="id" placeholder="Ej. FER-004" required />
+          <input type="text" id="id" name="id" placeholder="Ej. FER-016" required />
         </div>
         <div class="campo">
           <label for="nombre">Nombre *</label>
-          <input type="text" id="nombre" name="nombre" placeholder="Ej. Llave Expansiva 10&quot;" required />
+          <input type="text" id="nombre" name="nombre" placeholder="Ej. Nivel de Burbuja 24&quot;" required />
         </div>
         <div class="campo">
           <label for="cantidad">Cantidad *</label>
@@ -103,7 +142,7 @@
       </form>
     </section>
 
-    <!-- Visualización de datos en filas -->
+    <!-- Tabla en filas -->
     <section class="card">
       <h2>Listado de Inventario ({{ inventario | length }} registros)</h2>
       <div class="tabla-scroll">
@@ -159,3 +198,6 @@
   </main>
 </body>
 </html>
+   
+       
+            
