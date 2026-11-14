@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventario Ferretería — Python + HTML</title>
+  <style>
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body { background: #f1f5f9; color: #0f172a; margin: 0; padding: 0; }
+    header { background: #1e293b; color: #ffffff; padding: 1.2rem 2rem; border-bottom: 4px solid #d97706; }
+    header h1 { margin: 0; font-size: 1.4rem; }
+    header p { margin: 0.2rem 0 0; color: #cbd5e1; font-size: 0.9rem; }
+    .container { max-width: 1200px; margin: 1.5rem auto; padding: 0 1rem; }
+    .alerta-agotado {
+      background: #fee2e2; border: 1px solid #ef4444; color: #991b1b;
+      padding: 1rem; border-radius: 8px; margin-bottom: 1.25rem; font-weight: 500;
+    }
+    .card {
+      background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px;
+      padding: 1.25rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .card h2 { margin-top: 0; font-size: 1.15rem; color: #1e293b; }
+    .form-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.9rem; align-items: end;
+    }
+    .campo { display: flex; flex-direction: column; gap: 0.3rem; }
+    label { font-size: 0.85rem; font-weight: 600; }
+    input { padding: 0.55rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; }
+    .btn-guardar {
+      background: #d97706; color: #ffffff; border: none; padding: 0.62rem;
+      border-radius: 6px; font-weight: 700; cursor: pointer;
+    }
+    .btn-guardar:hover { background: #b45309; }
+    .tabla-scroll { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th, td { padding: 0.7rem 0.6rem; border-bottom: 1px solid #cbd5e1; text-align: left; white-space: nowrap; }
+    th { background: #f8fafc; color: #1e293b; }
+    tr.fila-agotada { background: #fef2f2; }
+    .badge { padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; }
+    .badge-ok { background: #dcfce7; color: #166534; }
+    .badge-no { background: #fee2e2; color: #991b1b; }
+    .acciones { display: flex; gap: 0.35rem; }
+    .btn-mini {
+      padding: 0.3rem 0.55rem; border: 1px solid #cbd5e1; background: #fff;
+      border-radius: 4px; cursor: pointer; font-size: 0.8rem;
+    }
+    .btn-mini:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-del { color: #991b1b; border-color: #fca5a5; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>FerreControl — Gestión de Inventario</h1>
+    <p>Backend en Python (Flask) + Frontend en HTML5</p>
+  </header>
+
+  <main class="container">
+    <!-- Notificación automática cuando existen productos con cantidad = 0 -->
+    {% if productos_agotados %}
+    <div class="alerta-agotado" role="alert">
+      <strong>⚠️ ALERTA DE PRODUCTO AGOTADO:</strong>
+      Los siguientes artículos tienen 0 unidades en el almacén:
+      <strong>{{ productos_agotados | join(', ') }}</strong>.
+    </div>
+    {% endif %}
+
+    <!-- Formulario web para ingresar datos del almacén -->
+    <section class="card">
+      <h2>Registrar / Actualizar Producto en Almacén</h2>
+      <form method="POST" action="/" class="form-grid">
+        <div class="campo">
+          <label for="id">ID *</label>
+          <input type="text" id="id" name="id" placeholder="Ej. FER-004" required />
+        </div>
+        <div class="campo">
+          <label for="nombre">Nombre *</label>
+          <input type="text" id="nombre" name="nombre" placeholder="Ej. Llave Expansiva 10&quot;" required />
+        </div>
+        <div class="campo">
+          <label for="cantidad">Cantidad *</label>
+          <input type="number" id="cantidad" name="cantidad" min="0" placeholder="0" required />
+        </div>
+        <div class="campo">
+          <label for="precio">Precio Base (sin IVA) *</label>
+          <input type="number" id="precio" name="precio" min="0" step="0.01" placeholder="25000" required />
+        </div>
+        <div class="campo">
+          <label for="iva_porcentaje">IVA (%)</label>
+          <input type="number" id="iva_porcentaje" name="iva_porcentaje" min="0" max="100" step="0.1" value="19" required />
+        </div>
+        <div class="campo">
+          <label for="fecha_compra">Fecha de Compra *</label>
+          <input type="date" id="fecha_compra" name="fecha_compra" required />
+        </div>
+        <div class="campo">
+          <label for="fecha_venta">Fecha de Venta</label>
+          <input type="date" id="fecha_venta" name="fecha_venta" />
+        </div>
+        <div class="campo">
+          <button type="submit" class="btn-guardar">Guardar Producto</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Visualización de datos en filas -->
+    <section class="card">
+      <h2>Listado de Inventario ({{ inventario | length }} registros)</h2>
+      <div class="tabla-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Cantidad</th>
+              <th>Precio Base</th>
+              <th>IVA Calculado</th>
+              <th>Precio con IVA</th>
+              <th>Fecha de Compra</th>
+              <th>Fecha de Venta</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in inventario %}
+            <tr class="{{ 'fila-agotada' if item.agotado else '' }}">
+              <td><strong>{{ item.id }}</strong></td>
+              <td>{{ item.nombre }}</td>
+              <td>{{ item.cantidad }}</td>
+              <td>${{ "{:,.2f}".format(item.precio) }}</td>
+              <td>${{ "{:,.2f}".format(item.valor_iva) }} ({{ item.iva_porcentaje }}%)</td>
+              <td><strong>${{ "{:,.2f}".format(item.precio_total) }}</strong></td>
+              <td>{{ item.fecha_compra }}</td>
+              <td>{{ item.fecha_venta if item.fecha_venta else 'Sin venta' }}</td>
+              <td>
+                {% if item.agotado %}
+                  <span class="badge badge-no">AGOTADO</span>
+                {% else %}
+                  <span class="badge badge-ok">Disponible</span>
+                {% endif %}
+              </td>
+              <td class="acciones">
+                <form method="POST" action="/vender/{{ item.id }}">
+                  <button type="submit" class="btn-mini" {{ 'disabled' if item.agotado else '' }}>
+                    Vender (-1)
+                  </button>
+                </form>
+                <form method="POST" action="/eliminar/{{ item.id }}">
+                  <button type="submit" class="btn-mini btn-del">Eliminar</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
