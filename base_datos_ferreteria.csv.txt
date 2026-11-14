@@ -1,0 +1,16 @@
+id,nombre,cantidad,precio,iva_porcentaje,fecha_compra,fecha_venta
+FER-001,Martillo de Una 16 oz Mango Fibra,15,28500,19,2026-10-15,2026-11-10
+FER-002,Taladro Percutor Inalambrico 1/2 Pulgada,4,215000,19,2026-10-18,2026-11-12
+FER-003,Bulto Cemento Gris Uso General 50 kg,0,32500,19,2026-10-20,2026-11-14
+FER-004,Caja Tornillos Drywall 1 Pulgada x100,25,11800,19,2026-10-22,
+FER-005,Llave Expansiva Ajustable 10 Pulgadas,8,34000,19,2026-10-25,2026-11-08
+FER-006,Disco de Corte Metal 4-1/2 Pulgadas,0,6500,19,2026-10-26,2026-11-13
+FER-007,Pintura Vinilo Tipo 1 Blanco Cunete 5 Gal,6,148000,19,2026-10-28,2026-11-09
+FER-008,Tubo PVC Presion 1/2 Pulgada x 6m,30,14200,19,2026-11-01,2026-11-11
+FER-009,Cerradura de Seguridad Alcoba Acero,3,68900,19,2026-11-02,
+FER-010,Flexometro Cinta Metrica 5 Metros,18,16500,19,2026-11-03,2026-11-12
+FER-011,Guantes de Carnaza Reforzados Par,0,12900,19,2026-11-04,2026-11-14
+FER-012,Silicona Transparente Uso General 280ml,12,15400,19,2026-11-06,
+FER-013,Alicate Universal Aislado 8 Pulgadas,9,29800,19,2026-11-07,2026-11-11
+FER-014,Bombillo LED 12W Luz Blanca Rosca E27,40,7200,19,2026-11-09,2026-11-13
+FER-015,Broca Muro Tungsteno 3/8 Pulgada,11,9800,19,2026-11-10,
